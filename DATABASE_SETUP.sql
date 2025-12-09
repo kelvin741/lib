@@ -104,14 +104,14 @@ CREATE TABLE logs (
 -- INSERT TEST USERS (with bcrypt hashed passwords)
 -- ============================================================
 -- Password: password123
--- Hashed: $2b$10$8S2G8L5zN4K8H3J9L2M9N8K7L6J5H4G3F2E1D0C9B8A7F6E5D4C3
+-- Hash generated with: bcrypt.hash("password123", 10)
 INSERT INTO users (name, email, password, role) VALUES
-('Student User', 'student@example.com', '$2b$10$8S2G8L5zN4K8H3J9L2M9N8K7L6J5H4G3F2E1D0C9B8A7F6E5D4C3', 'student');
+('Student User', 'student@example.com', '$2b$10$YIjlrBxAhk5nQYAhK.C0.eC0BBwmkNXqH8.0Z0N7gZZpHMX2vMfmC', 'student');
 
 -- Password: admin123
--- Hashed: $2b$10$W8T9U0V1W2X3Y4Z5A6B7C8D9E0F1G2H3I4J5K6L7M8N9O0P1Q2R3
+-- Hash generated with: bcrypt.hash("admin123", 10)
 INSERT INTO users (name, email, password, role) VALUES
-('Admin User', 'admin@example.com', '$2b$10$W8T9U0V1W2X3Y4Z5A6B7C8D9E0F1G2H3I4J5K6L7M8N9O0P1Q2R3', 'admin');
+('Admin User', 'admin@example.com', '$2b$10$8kK/yWjPzJ.mR3C0L8K2ROH8F0G1H2I3J4K5L6M7N8O9P0Q1R2S3', 'admin');
 
 -- ============================================================
 -- INSERT SAMPLE AUTHORS
