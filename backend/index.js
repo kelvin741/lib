@@ -4,6 +4,8 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 const app = express();
 app.use(express.json());
@@ -16,6 +18,20 @@ const db = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: process.env.DATABASE_SSL === "true" ? { rejectUnauthorized: false } : false
 });
+
+// MIDDLEWARE: Verify JWT Token
+const verifyToken = (req, res, next) => {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({msg: "No token provided"});
+    
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded;
+        next();
+    } catch (e) {
+        res.status(401).json({msg: "Invalid token"});
+    }
+};
 
 // TEST ROUTE
 app.get("/",(req,res)=>{ res.send("Library Server Running"); });
@@ -35,26 +51,30 @@ app.get("/test-db", async (req,res)=>{
 app.post("/register", async (req,res)=>{
     let {name,email,password,role} = req.body;
     try{
+        const hashedPassword = await bcrypt.hash(password, 10);
         await db.query(
             "INSERT INTO users(name,email,password,role) VALUES($1,$2,$3,$4)",
-            [name,email,password,role || "student"]
+            [name,email,hashedPassword,role || "student"]
         );
-        res.json({msg:"Registered"});
+        res.json({msg:"Registered successfully"});
     }catch(e){
-        res.json({msg:"Email already exists"});
+        res.status(400).json({msg:"Email already exists"});
     }
 });
 
 
-// LOGIN (FIXED)
+// LOGIN (WITH JWT)
 app.post("/login", async(req,res)=>{
     let {email,password} = req.body;
     let user = await db.query("SELECT * FROM users WHERE email=$1",[email]);
 
-    if(user.rows.length === 0) return res.json({msg:"No account"});
-    if(user.rows[0].password !== password) return res.json({msg:"Wrong password"});
+    if(user.rows.length === 0) return res.status(400).json({msg:"No account found"});
+    
+    const passwordMatch = await bcrypt.compare(password, user.rows[0].password);
+    if(!passwordMatch) return res.status(400).json({msg:"Wrong password"});
 
-    res.json({msg:"success", user:user.rows[0]}); // <-- FIXED
+    const token = jwt.sign({id: user.rows[0].id, email: user.rows[0].email, role: user.rows[0].role}, process.env.JWT_SECRET, {expiresIn: "24h"});
+    res.json({msg:"success", token: token, user: {id: user.rows[0].id, name: user.rows[0].name, email: user.rows[0].email, role: user.rows[0].role}}); 
 });
 
 
@@ -66,57 +86,82 @@ app.get("/books", async(req,res)=>{
 });
 
 
-// ADD BOOK (ADMIN) — UPDATED (removed isbn)
-app.post("/books", async(req,res)=>{
+// ADD BOOK (ADMIN) — REQUIRES JWT
+app.post("/books", verifyToken, async(req,res)=>{
+    if(req.user.role !== "admin") return res.status(403).json({msg:"Admin access required"});
+    
     let {title,author,category} = req.body;
-    await db.query("INSERT INTO books(title,author,category) VALUES($1,$2,$3)", 
-    [title,author,category]);
-    res.json({msg:"Book added"});
+    try {
+        await db.query("INSERT INTO books(title,author,category) VALUES($1,$2,$3)", 
+        [title,author,category]);
+        res.json({msg:"Book added"});
+    } catch(e) {
+        res.status(400).json({msg:"Error adding book", error: e.message});
+    }
 });
 
 
-// DELETE BOOK
-app.delete("/books/:id", async(req,res)=>{
-    await db.query("DELETE FROM books WHERE id=$1",[req.params.id]);
-    res.json({msg:"Deleted"});
+// DELETE BOOK (ADMIN)
+app.delete("/books/:id", verifyToken, async(req,res)=>{
+    if(req.user.role !== "admin") return res.status(403).json({msg:"Admin access required"});
+    
+    try {
+        await db.query("DELETE FROM books WHERE id=$1",[req.params.id]);
+        res.json({msg:"Deleted"});
+    } catch(e) {
+        res.status(400).json({msg:"Error deleting book", error: e.message});
+    }
 });
 
 
-// BORROW BOOK
-app.post("/borrow/:id", async(req,res)=>{
-    let {user_id} = req.body;
+// BORROW BOOK (REQUIRES LOGIN)
+app.post("/borrow/:id", verifyToken, async(req,res)=>{
+    let user_id = req.user.id;
 
     let due = new Date();
     due.setDate(due.getDate()+7);
 
-    await db.query("INSERT INTO borrow(user_id,book_id,due_date) VALUES($1,$2,$3)",[user_id,req.params.id,due]);
-    await db.query("UPDATE books SET available=false WHERE id=$1",[req.params.id]);
-
-    res.json({msg:"Borrowed"});
+    try {
+        await db.query("INSERT INTO borrow(user_id,book_id,due_date) VALUES($1,$2,$3)",[user_id,req.params.id,due]);
+        await db.query("UPDATE books SET available=false WHERE id=$1",[req.params.id]);
+        res.json({msg:"Borrowed successfully"});
+    } catch(e) {
+        res.status(400).json({msg:"Error borrowing book", error: e.message});
+    }
 });
 
 
-// RETURN BOOK
-app.post("/return/:id", async(req,res)=>{
-    let {user_id} = req.body;
+// RETURN BOOK (REQUIRES LOGIN)
+app.post("/return/:id", verifyToken, async(req,res)=>{
+    let user_id = req.user.id;
 
-    await db.query("UPDATE borrow SET return_date=NOW() WHERE user_id=$1 AND book_id=$2",
-    [user_id,req.params.id]);
-
-    await db.query("UPDATE books SET available=true WHERE id=$1",[req.params.id]);
+    try {
+        await db.query("UPDATE borrow SET return_date=NOW() WHERE user_id=$1 AND book_id=$2",
+        [user_id,req.params.id]);
+        await db.query("UPDATE books SET available=true WHERE id=$1",[req.params.id]);
+        res.json({msg:"Book returned successfully"});
+    } catch(e) {
+        res.status(400).json({msg:"Error returning book", error: e.message});
+    }
 
     res.json({msg:"Returned"});
 });
 
 
-// MY BORROWS
-app.get("/mybooks/:uid", async(req,res)=>{
-    let out = await db.query(`
-       SELECT b.title,b.author,br.borrow_date,br.due_date,br.return_date,br.book_id
-       FROM borrow br 
-       JOIN books b ON b.id=br.book_id 
-       WHERE br.user_id=$1`,[req.params.uid]);
-    res.json(out.rows);
+// MY BORROWS (REQUIRES LOGIN)
+app.get("/mybooks/:uid", verifyToken, async(req,res)=>{
+    if(req.user.id != req.params.uid) return res.status(403).json({msg:"Access denied"});
+    
+    try {
+        let out = await db.query(`
+           SELECT b.title,b.author,br.borrow_date,br.due_date,br.return_date,br.book_id
+           FROM borrow br 
+           JOIN books b ON b.id=br.book_id 
+           WHERE br.user_id=$1`,[req.params.uid]);
+        res.json(out.rows);
+    } catch(e) {
+        res.status(400).json({msg:"Error fetching borrowed books", error: e.message});
+    }
 });
 
 
