@@ -46,6 +46,77 @@ app.get("/test-db", async (req,res)=>{
     }
 });
 
+// INITIALIZE DATABASE SCHEMA
+app.get("/init-db", async (req,res)=>{
+    try {
+        // Create users table
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                email VARCHAR(255) UNIQUE NOT NULL,
+                password VARCHAR(255) NOT NULL,
+                role VARCHAR(50) DEFAULT 'student',
+                created_at TIMESTAMP DEFAULT NOW()
+            )
+        `);
+
+        // Create books table
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS books (
+                id SERIAL PRIMARY KEY,
+                title VARCHAR(255) NOT NULL,
+                author VARCHAR(255) NOT NULL,
+                isbn VARCHAR(20) UNIQUE,
+                category VARCHAR(100),
+                available BOOLEAN DEFAULT true,
+                created_at TIMESTAMP DEFAULT NOW()
+            )
+        `);
+
+        // Create borrow table
+        await db.query(`
+            CREATE TABLE IF NOT EXISTS borrow (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id),
+                book_id INTEGER REFERENCES books(id),
+                borrow_date TIMESTAMP DEFAULT NOW(),
+                due_date TIMESTAMP,
+                return_date TIMESTAMP,
+                created_at TIMESTAMP DEFAULT NOW()
+            )
+        `);
+
+        // Insert test data if not exists
+        const userCheck = await db.query("SELECT COUNT(*) FROM users");
+        if(userCheck.rows[0].count == 0) {
+            const hashedStudent = await bcrypt.hash("password123", 10);
+            const hashedAdmin = await bcrypt.hash("admin123", 10);
+            
+            await db.query("INSERT INTO users(name, email, password, role) VALUES($1, $2, $3, $4)", 
+                ["Student User", "student@example.com", hashedStudent, "student"]);
+            
+            await db.query("INSERT INTO users(name, email, password, role) VALUES($1, $2, $3, $4)", 
+                ["Admin User", "admin@example.com", hashedAdmin, "admin"]);
+            
+            // Add sample books
+            await db.query(`
+                INSERT INTO books(title, author, isbn, category, available) VALUES
+                ('The Great Gatsby', 'F. Scott Fitzgerald', '978-0-7432-7356-5', 'Fiction', true),
+                ('To Kill a Mockingbird', 'Harper Lee', '978-0-06-112008-4', 'Fiction', true),
+                ('1984', 'George Orwell', '978-0-452-26255-4', 'Fiction', true),
+                ('Python Programming', 'Guido van Rossum', '978-0-596-10910-5', 'Technology', true),
+                ('Data Science Handbook', 'Jake VanderPlas', '978-1-491-91205-8', 'Technology', true)
+            `);
+        }
+
+        res.json({msg:"Database initialized successfully"});
+    } catch (e) {
+        console.error("DB init error:", e.message);
+        res.status(500).json({msg:"Database initialization failed", error: e.message});
+    }
+});
+
 
 // REGISTER
 app.post("/register", async (req,res)=>{
