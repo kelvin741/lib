@@ -49,9 +49,21 @@ app.get("/test-db", async (req,res)=>{
 // INITIALIZE DATABASE SCHEMA
 app.get("/init-db", async (req,res)=>{
     try {
+        // Drop existing tables in correct order (due to foreign keys)
+        await db.query("DROP TABLE IF EXISTS borrow CASCADE");
+        await db.query("DROP TABLE IF EXISTS book_copies CASCADE");
+        await db.query("DROP TABLE IF EXISTS book_authors CASCADE");
+        await db.query("DROP TABLE IF EXISTS books CASCADE");
+        await db.query("DROP TABLE IF EXISTS authors CASCADE");
+        await db.query("DROP TABLE IF EXISTS categories CASCADE");
+        await db.query("DROP TABLE IF EXISTS library_summary CASCADE");
+        await db.query("DROP TABLE IF EXISTS book_full_view CASCADE");
+        await db.query("DROP TABLE IF EXISTS logs CASCADE");
+        await db.query("DROP TABLE IF EXISTS users CASCADE");
+
         // Create users table
         await db.query(`
-            CREATE TABLE IF NOT EXISTS users (
+            CREATE TABLE users (
                 id SERIAL PRIMARY KEY,
                 name VARCHAR(255) NOT NULL,
                 email VARCHAR(255) UNIQUE NOT NULL,
@@ -61,22 +73,59 @@ app.get("/init-db", async (req,res)=>{
             )
         `);
 
+        // Create categories table
+        await db.query(`
+            CREATE TABLE categories (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(100) UNIQUE NOT NULL,
+                description TEXT
+            )
+        `);
+
+        // Create authors table
+        await db.query(`
+            CREATE TABLE authors (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255) UNIQUE NOT NULL,
+                biography TEXT
+            )
+        `);
+
         // Create books table
         await db.query(`
-            CREATE TABLE IF NOT EXISTS books (
+            CREATE TABLE books (
                 id SERIAL PRIMARY KEY,
                 title VARCHAR(255) NOT NULL,
                 author VARCHAR(255) NOT NULL,
-                isbn VARCHAR(20) UNIQUE,
+                isbn VARCHAR(20) UNIQUE NOT NULL,
                 category VARCHAR(100),
                 available BOOLEAN DEFAULT true,
                 created_at TIMESTAMP DEFAULT NOW()
             )
         `);
 
+        // Create book_authors table (for many-to-many relationship)
+        await db.query(`
+            CREATE TABLE book_authors (
+                id SERIAL PRIMARY KEY,
+                book_id INTEGER REFERENCES books(id),
+                author_id INTEGER REFERENCES authors(id)
+            )
+        `);
+
+        // Create book_copies table
+        await db.query(`
+            CREATE TABLE book_copies (
+                id SERIAL PRIMARY KEY,
+                book_id INTEGER REFERENCES books(id),
+                copy_number INTEGER,
+                available BOOLEAN DEFAULT true
+            )
+        `);
+
         // Create borrow table
         await db.query(`
-            CREATE TABLE IF NOT EXISTS borrow (
+            CREATE TABLE borrow (
                 id SERIAL PRIMARY KEY,
                 user_id INTEGER REFERENCES users(id),
                 book_id INTEGER REFERENCES books(id),
@@ -87,30 +136,61 @@ app.get("/init-db", async (req,res)=>{
             )
         `);
 
-        // Insert test data if not exists
-        const userCheck = await db.query("SELECT COUNT(*) FROM users");
-        if(userCheck.rows[0].count == 0) {
-            const hashedStudent = await bcrypt.hash("password123", 10);
-            const hashedAdmin = await bcrypt.hash("admin123", 10);
-            
-            await db.query("INSERT INTO users(name, email, password, role) VALUES($1, $2, $3, $4)", 
-                ["Student User", "student@example.com", hashedStudent, "student"]);
-            
-            await db.query("INSERT INTO users(name, email, password, role) VALUES($1, $2, $3, $4)", 
-                ["Admin User", "admin@example.com", hashedAdmin, "admin"]);
-            
-            // Add sample books
-            await db.query(`
-                INSERT INTO books(title, author, isbn, category, available) VALUES
-                ('The Great Gatsby', 'F. Scott Fitzgerald', '978-0-7432-7356-5', 'Fiction', true),
-                ('To Kill a Mockingbird', 'Harper Lee', '978-0-06-112008-4', 'Fiction', true),
-                ('1984', 'George Orwell', '978-0-452-26255-4', 'Fiction', true),
-                ('Python Programming', 'Guido van Rossum', '978-0-596-10910-5', 'Technology', true),
-                ('Data Science Handbook', 'Jake VanderPlas', '978-1-491-91205-8', 'Technology', true)
-            `);
+        // Create logs table
+        await db.query(`
+            CREATE TABLE logs (
+                id SERIAL PRIMARY KEY,
+                action VARCHAR(255),
+                user_id INTEGER REFERENCES users(id),
+                timestamp TIMESTAMP DEFAULT NOW()
+            )
+        `);
+
+        // Insert test users
+        const hashedStudent = await bcrypt.hash("password123", 10);
+        const hashedAdmin = await bcrypt.hash("admin123", 10);
+        
+        await db.query("INSERT INTO users(name, email, password, role) VALUES($1, $2, $3, $4)", 
+            ["Student User", "student@example.com", hashedStudent, "student"]);
+        
+        await db.query("INSERT INTO users(name, email, password, role) VALUES($1, $2, $3, $4)", 
+            ["Admin User", "admin@example.com", hashedAdmin, "admin"]);
+
+        // Insert sample authors
+        const authors = [
+            "F. Scott Fitzgerald",
+            "Harper Lee",
+            "George Orwell",
+            "J.K. Rowling",
+            "Stephen King"
+        ];
+
+        for(let author of authors) {
+            await db.query("INSERT INTO authors(name) VALUES($1)", [author]);
         }
 
-        res.json({msg:"Database initialized successfully"});
+        // Insert sample categories
+        const categories = ["Fiction", "Mystery", "Science Fiction", "Technology", "Biography"];
+        for(let cat of categories) {
+            await db.query("INSERT INTO categories(name) VALUES($1)", [cat]);
+        }
+
+        // Insert sample books with ISBN
+        await db.query(`
+            INSERT INTO books(title, author, isbn, category, available) VALUES
+            ('The Great Gatsby', 'F. Scott Fitzgerald', '978-0-7432-7356-5', 'Fiction', true),
+            ('To Kill a Mockingbird', 'Harper Lee', '978-0-06-112008-4', 'Fiction', true),
+            ('1984', 'George Orwell', '978-0-452-26255-4', 'Science Fiction', true),
+            ('Harry Potter and the Philosopher''s Stone', 'J.K. Rowling', '978-0-43965-959-8', 'Fiction', true),
+            ('The Shining', 'Stephen King', '978-0-385-12167-5', 'Mystery', true),
+            ('Python Programming', 'Guido van Rossum', '978-0-596-10910-5', 'Technology', true),
+            ('Data Science Handbook', 'Jake VanderPlas', '978-1-491-91205-8', 'Technology', true),
+            ('Clean Code', 'Robert C. Martin', '978-0-13-235088-4', 'Technology', true),
+            ('The Hobbit', 'J.R.R. Tolkien', '978-0-547-92836-8', 'Fiction', true),
+            ('Dune', 'Frank Herbert', '978-0-441-17271-9', 'Science Fiction', true)
+        `);
+
+        res.json({msg:"✅ Database reset and initialized successfully with test data"});
     } catch (e) {
         console.error("DB init error:", e.message);
         res.status(500).json({msg:"Database initialization failed", error: e.message});
