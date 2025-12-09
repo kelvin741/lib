@@ -50,7 +50,18 @@ app.get("/test-db", async (req,res)=>{
 // REGISTER
 app.post("/register", async (req,res)=>{
     let {name,email,password,role} = req.body;
+    
+    if(!name || !email || !password) {
+        return res.status(400).json({msg:"Please fill all required fields"});
+    }
+    
     try{
+        // Check if email already exists
+        const existing = await db.query("SELECT id FROM users WHERE email=$1", [email]);
+        if(existing.rows.length > 0) {
+            return res.status(400).json({msg:"Email already registered"});
+        }
+        
         const hashedPassword = await bcrypt.hash(password, 10);
         await db.query(
             "INSERT INTO users(name,email,password,role) VALUES($1,$2,$3,$4)",
@@ -58,7 +69,8 @@ app.post("/register", async (req,res)=>{
         );
         res.json({msg:"Registered successfully"});
     }catch(e){
-        res.status(400).json({msg:"Email already exists"});
+        console.error("Registration error:", e.message);
+        res.status(400).json({msg:"Registration failed: " + e.message});
     }
 });
 
