@@ -1,0 +1,496 @@
+/* ===== GLOBAL STYLES ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+/* ===== AUTHENTICATION PAGES ===== */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.auth-box {
+    background: white;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 400px;
+    animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.auth-box h1 {
+    text-align: center;
+    color: #667eea;
+    margin-bottom: 10px;
+    font-size: 28px;
+}
+
+.auth-box h2 {
+    text-align: center;
+    color: #555;
+    margin-bottom: 30px;
+    font-size: 24px;
+}
+
+.auth-box input,
+.auth-box select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: border-color 0.3s;
+}
+
+.auth-box input:focus,
+.auth-box select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.auth-link {
+    text-align: center;
+    margin-top: 20px;
+    color: #666;
+}
+
+.auth-link a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.auth-link a:hover {
+    text-decoration: underline;
+}
+
+/* ===== BUTTONS ===== */
+.btn-primary,
+.btn-search,
+.btn-logout,
+.btn-borrow,
+.btn-return,
+.btn-delete {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 15px;
+}
+
+.btn-primary {
+    width: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    margin-top: 10px;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-search {
+    background: #667eea;
+    color: white;
+    padding: 10px 20px;
+    margin-left: 10px;
+}
+
+.btn-search:hover {
+    background: #764ba2;
+}
+
+.btn-logout {
+    background: #ff6b6b;
+    color: white;
+    padding: 10px 20px;
+}
+
+.btn-logout:hover {
+    background: #ff5252;
+}
+
+.btn-borrow {
+    background: #51cf66;
+    color: white;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.btn-borrow:hover {
+    background: #40c057;
+}
+
+.btn-return {
+    background: #ffa94d;
+    color: white;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.btn-return:hover {
+    background: #ff922b;
+}
+
+.btn-delete {
+    background: #ff6b6b;
+    color: white;
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px 15px;
+}
+
+.btn-delete:hover {
+    background: #ff5252;
+}
+
+.btn-unavailable {
+    background: #ccc;
+    color: #666;
+    width: 100%;
+    margin-top: 10px;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* ===== NAVBAR & HEADER ===== */
+.navbar {
+    background: white;
+    padding: 20px 30px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.nav-left h1 {
+    color: #667eea;
+    margin-bottom: 5px;
+    font-size: 24px;
+}
+
+.nav-left p {
+    color: #999;
+    font-size: 14px;
+}
+
+/* ===== MAIN CONTAINER ===== */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+section {
+    background: white;
+    padding: 30px;
+    margin-bottom: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+section h2 {
+    color: #667eea;
+    margin-bottom: 20px;
+    font-size: 22px;
+    border-bottom: 3px solid #667eea;
+    padding-bottom: 10px;
+}
+
+/* ===== SEARCH SECTION ===== */
+.search-box {
+    display: flex;
+    gap: 10px;
+}
+
+.search-box input {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 15px;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+/* ===== FORM BOX (ADD BOOK) ===== */
+.form-box {
+    display: grid;
+    gap: 15px;
+}
+
+.form-box input {
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: border-color 0.3s;
+}
+
+.form-box input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* ===== BOOKS GRID ===== */
+.books-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.book {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+}
+
+.book:hover {
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+    transform: translateY(-5px);
+}
+
+.book.available {
+    border-left: 5px solid #51cf66;
+}
+
+.book.borrowed {
+    border-left: 5px solid #ffa94d;
+    opacity: 0.7;
+}
+
+.book-info {
+    flex: 1;
+    margin-bottom: 15px;
+}
+
+.book-info h4 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+.book-info p {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.book-info p strong {
+    color: #667eea;
+}
+
+.status {
+    margin-top: 10px;
+    padding: 8px;
+    border-radius: 5px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.status.available {
+    background: #d3f9d8;
+    color: #2b8a3e;
+}
+
+.status.borrowed {
+    background: #ffe8a8;
+    color: #9c4a08;
+}
+
+.book-actions,
+.borrow-actions {
+    display: grid;
+    gap: 10px;
+}
+
+.book-admin {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 15px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 20px;
+}
+
+.book-admin .book-info {
+    margin-bottom: 0;
+}
+
+/* ===== BORROWED BOOKS SECTION ===== */
+.borrowed-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.borrowed-book {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+}
+
+.borrowed-book:hover {
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+    transform: translateY(-5px);
+}
+
+.borrowed-book.active {
+    border-left: 5px solid #ffa94d;
+}
+
+.borrowed-book.returned {
+    border-left: 5px solid #51cf66;
+    opacity: 0.7;
+}
+
+.borrow-info {
+    flex: 1;
+    margin-bottom: 15px;
+}
+
+.borrow-info h4 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+.borrow-info p {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.borrow-info p strong {
+    color: #667eea;
+}
+
+.borrow-info .status {
+    margin-top: 10px;
+    padding: 8px;
+    border-radius: 5px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.borrow-info .status::before {
+    content: "";
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+/* ===== EMPTY STATES ===== */
+#bookList p,
+#my p,
+#bookListAdmin p {
+    text-align: center;
+    color: #999;
+    padding: 40px 20px;
+    font-size: 16px;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .books-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .borrowed-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .search-box {
+        flex-direction: column;
+    }
+
+    .btn-search {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .navbar {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+
+    .btn-logout {
+        width: 100%;
+    }
+
+    .book-admin {
+        grid-template-columns: 1fr;
+    }
+
+    section {
+        padding: 20px;
+    }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.book,
+.borrowed-book,
+.book-admin {
+    animation: fadeIn 0.3s ease-out;
+}
