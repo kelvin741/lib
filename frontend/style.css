@@ -1,0 +1,116 @@
+/ GLOBAL STYLING /
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  margin: 0;
+  padding: 30px;
+  min-height: 100vh;
+}
+
+.container, #dashboard, #adminPanel {
+  max-width: 900px;
+  margin: auto;
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0px 10px 30px rgba(0,0,0,0.2);
+}
+
+h2 { color:#333; margin-bottom:15px; }
+h3 { color:#555; margin-top:25px; margin-bottom:10px; }
+
+/ AUTH FORMS /
+.box {
+  max-width: 400px;
+  margin:auto;
+  background:white;
+  padding:30px;
+  border-radius:15px;
+  box-shadow:0 8px 20px rgba(0,0,0,0.15);
+}
+
+input,select {
+  width:100%;
+  padding:12px;
+  border:1px solid #ddd;
+  margin-top:10px;
+  border-radius:8px;
+  font-size:15px;
+}
+
+button {
+  padding:10px 20px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  transition:.3s;
+  font-weight:bold;
+  color:white;
+}
+
+/* Auth Buttons */
+.auth-btn, button {
+  background:#4a90e2;
+}
+
+button:hover { opacity:.85; transform:scale(.97); }
+
+/ DASHBOARD LAYOUT /
+#dashboard, #adminPanel {
+  display:none;
+}
+
+/* Book list grid */
+#bookList {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+  gap:20px;
+}
+
+/* Single book card */
+.book {
+  background:#f9f9f9;
+  padding:15px;
+  border-radius:10px;
+  border-left:4px solid #4a90e2;
+  box-shadow:0 2px 8px rgba(0,0,0,.1);
+}
+
+.book:hover{ transform:translateY(-3px); transition:.3s; }
+
+/* Borrow Button */
+.book button {
+  background:#28a745;
+  color:white;
+  width:100%;
+  margin-top:10px;
+}
+
+.book button:hover { background:#1f7c33; }
+
+/* Admin Delete Button */
+.book .delete-btn {
+  background:#ff4444 !important;
+}
+.book .delete-btn:hover { background:#d73838!important; }
+
+/* My borrowed list */
+#my p{
+  background:#eef3ff;
+  padding:12px;
+  border-radius:8px;
+  margin-bottom:10px;
+  border-left:4px solid #4a90e2;
+}
+
+/* Return button */
+#my button{
+  background:#ff8800;
+}
+#my button:hover{ background:#e67300; }
+
+/* Logout */
+.logout-btn{
+  background:#d9534f;
+}
+.logout-btn:hover{ background:#b74440; }

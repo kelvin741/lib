@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Digital Library System</title>
+    <link rel="stylesheet" href="style/style.css">
+
+    <style>
+        body { font-family: Arial; background: #f2f2f2; padding: 40px; }
+        .box { width: 350px; background: white; padding: 25px; margin:auto; border-radius:5px; }
+        input,select { width:90%; padding:8px; margin-top:8px; }
+        button{ padding:7px 15px; margin-top:10px; cursor:pointer; }
+        #dashboard,#adminPanel{ display:none; }
+        .book{ background:white;margin:6px;padding:10px;border-radius:5px; }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="box">
+    <h2>Login</h2>
+    <input id="lemail" type="email" placeholder="Email">
+    <input id="lpassword" type="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <p>No account? <a href="#" onclick="showRegister()">Register</a></p>
+</div>
+
+<!-- REGISTER PAGE -->
+<div id="registerPage" class="box" style="display:none;">
+    <h2>Register</h2>
+    <input id="name" placeholder="Full Name">
+    <input id="email" type="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+
+    <select id="role">
+        <option value="student">Student</option>
+        <option value="admin">Admin</option>
+    </select>
+
+    <button onclick="register()">Register</button>
+    <p>Have account? <a href="#" onclick="showLogin()">Login</a></p>
+</div>
+
+<!-- STUDENT DASHBOARD -->
+<div id="dashboard">
+    <h2>Student Dashboard</h2>
+    <button onclick="logout()">Logout</button><br><br>
+
+    <input id="search" placeholder="Search books...">
+    <button onclick="searchBooks()">Search</button>
+
+    <h3>Available Books</h3>
+    <div id="bookList"></div>
+
+    <h3>Borrowed Books</h3>
+    <div id="my"></div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel">
+    <h2>Admin Panel</h2>
+    <button onclick="logout()">Logout</button><br><br>
+
+    <input id="title" placeholder="Book Title">
+    <input id="author" placeholder="Author">
+    <input id="category" placeholder="Category">
+    <button onclick="addBook()">Add Book</button>
+
+    <h3>All Books</h3>
+    <div id="bookListAdmin"></div>
+</div>
+
+<!-- must be outside script blocks -->
+<script src="script/script.js"></script>
+
+<script>
+function showRegister(){ loginPage.style.display="none"; registerPage.style.display="block"; }
+function showLogin(){ registerPage.style.display="none"; loginPage.style.display="block"; }
+
+if(localStorage.user){ 
+    let u = JSON.parse(localStorage.user);
+    if(u.role=="admin") loadAdmin();
+    else loadStudent();
+}
+
+function logout(){
+    localStorage.removeItem("user");
+    location.reload();
+}
+</script>
+
+</body>
+</html>
