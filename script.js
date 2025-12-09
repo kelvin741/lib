@@ -3,17 +3,39 @@ const API = window.location.hostname === "localhost"
     ? "http://localhost:3003" 
     : "https://lib-9gnv.onrender.com";
 
+// Show loading state on buttons
+function setButtonLoading(button, loading = true) {
+    if(loading) {
+        button.disabled = true;
+        button.dataset.originalText = button.innerText;
+        button.innerText = "⏳ Loading...";
+    } else {
+        button.disabled = false;
+        button.innerText = button.dataset.originalText || "Submit";
+    }
+}
+
 // REGISTER - REQUIREMENT: User Registration & Authentication (15 Marks)
-async function register(){
+async function register(event){
+    if(event) event.preventDefault();
+    
     let name = document.getElementById("name").value.trim();
     let email = document.getElementById("email").value.trim();
     let password = document.getElementById("password").value;
     let role = document.getElementById("role").value;
 
-    if(!name || !email || !password) {
-        alert("Please fill all fields");
+    if(!name || !email || !password || !role) {
+        alert("❌ Please fill all required fields");
         return;
     }
+
+    if(password.length < 6) {
+        alert("❌ Password must be at least 6 characters");
+        return;
+    }
+
+    let button = document.querySelector("#registerForm button");
+    setButtonLoading(button, true);
 
     try {
         let r = await fetch(API + "/register", {
@@ -25,25 +47,33 @@ async function register(){
         let data = await r.json();
         
         if(r.ok) {
-            alert("✓ Registered Successfully! Please login");
+            alert("✅ Registered Successfully! Please login");
+            document.getElementById("registerForm").reset();
             showLogin();
         } else {
-            alert("❌ " + data.msg);
+            alert("❌ " + (data.msg || "Registration failed"));
         }
     } catch(e) {
-        alert("Connection error: " + e.message);
+        alert("❌ Connection error: " + e.message);
+    } finally {
+        setButtonLoading(button, false);
     }
 }
 
 // LOGIN - REQUIREMENT: Secure user registration and login (students only)
-async function login(){
+async function login(event){
+    if(event) event.preventDefault();
+    
     let email = document.getElementById("lemail").value.trim();
     let password = document.getElementById("lpassword").value;
 
     if(!email || !password) {
-        alert("Please enter email and password");
+        alert("❌ Please enter email and password");
         return;
     }
+
+    let button = document.querySelector("#loginForm button");
+    setButtonLoading(button, true);
 
     try {
         let r = await fetch(API + "/login", {
@@ -59,15 +89,17 @@ async function login(){
             localStorage.setItem("token", data.token);
             localStorage.setItem("user", JSON.stringify(data.user));
             
-            alert("✓ Login successful!");
+            alert("✅ Login successful!");
 
             if(data.user.role === "admin") loadAdmin();
             else loadStudent();
         } else {
-            alert("❌ " + data.msg);
+            alert("❌ " + (data.msg || "Login failed"));
         }
     } catch(e) {
-        alert("Connection error: " + e.message);
+        alert("❌ Connection error: " + e.message);
+    } finally {
+        setButtonLoading(button, false);
     }
 }
 
@@ -79,7 +111,7 @@ async function loadStudent(){
     adminPanel.style.display = "none";
 
     let user = JSON.parse(localStorage.user);
-    document.getElementById("welcomeMsg").innerText = `Welcome, ${user.name}!`;
+    document.getElementById("welcomeMsg").innerText = `Welcome, ${user.name}! 👋`;
     
     await searchBooks();
     await myBooks();
@@ -93,7 +125,7 @@ async function loadAdmin(){
     adminPanel.style.display = "block";
 
     let user = JSON.parse(localStorage.user);
-    document.getElementById("adminWelcome").innerText = `Admin Panel - ${user.name}`;
+    document.getElementById("adminWelcome").innerText = `Welcome, ${user.name}! 📋`;
     
     await loadAllBooksAdmin();
 }
@@ -154,16 +186,21 @@ async function searchBooks(){
 }
 
 //  ADMIN ADD BOOK - REQUIREMENT: Admin users can add books
-async function addBook(){
+async function addBook(event){
+    if(event) event.preventDefault();
+    
     let title = document.getElementById("title").value.trim();
     let author = document.getElementById("author").value.trim();
     let isbn = document.getElementById("isbn").value.trim();
     let category = document.getElementById("category").value.trim();
 
     if(!title || !author || !isbn || !category) {
-        alert("Please fill all fields");
+        alert("❌ Please fill all required fields");
         return;
     }
+
+    let button = document.querySelector("#addBookForm button");
+    setButtonLoading(button, true);
 
     try {
         let r = await fetch(API + "/books", {
@@ -175,17 +212,16 @@ async function addBook(){
         let data = await r.json();
 
         if(r.ok) {
-            alert("✓ Book added successfully");
-            document.getElementById("title").value = "";
-            document.getElementById("author").value = "";
-            document.getElementById("isbn").value = "";
-            document.getElementById("category").value = "";
+            alert("✅ Book added successfully");
+            document.getElementById("addBookForm").reset();
             await loadAllBooksAdmin();
         } else {
             alert("❌ " + (data.msg || "Error adding book"));
         }
     } catch(e) {
-        alert("Connection error: " + e.message);
+        alert("❌ Connection error: " + e.message);
+    } finally {
+        setButtonLoading(button, false);
     }
 }
 

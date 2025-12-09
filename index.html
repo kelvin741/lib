@@ -3,39 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digital Library Catalogue System</title>
+    <meta name="description" content="Digital Library Catalogue System - Manage and browse books easily">
+    <title>📚 Digital Library Catalogue System</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <!-- LOGIN PAGE -->
     <div id="loginPage" class="auth-container">
         <div class="auth-box">
-            <h1>📚 Digital Library</h1>
-            <h2>Login</h2>
-            <input id="lemail" type="email" placeholder="📧 Email Address" required>
-            <input id="lpassword" type="password" placeholder="🔐 Password" required>
-            <button class="btn-primary" onclick="login()">Login</button>
-            <p class="auth-link">No account? <a href="#" onclick="showRegister(); return false;">Register here</a></p>
+            <div class="auth-header">
+                <h1>📚 Digital Library</h1>
+                <p class="subtitle">Catalogue System</p>
+            </div>
+            <h2>Student Login</h2>
+            <form onsubmit="login(event)" id="loginForm">
+                <div class="form-group">
+                    <label for="lemail">Email Address</label>
+                    <input id="lemail" type="email" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="lpassword">Password</label>
+                    <input id="lpassword" type="password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="btn-primary">🔐 Login</button>
+            </form>
+            <p class="auth-link">No account? <a href="#" onclick="showRegister(); return false;">Create one now</a></p>
+            <div class="test-credentials">
+                <p><strong>📝 Test Credentials:</strong></p>
+                <p>Student: student@example.com / password123</p>
+                <p>Admin: admin@example.com / admin123</p>
+            </div>
         </div>
     </div>
 
     <!-- REGISTER PAGE -->
     <div id="registerPage" class="auth-container" style="display:none;">
         <div class="auth-box">
-            <h1>📚 Digital Library</h1>
-            <h2>Create Account</h2>
-            <input id="name" type="text" placeholder="👤 Full Name" required>
-            <input id="email" type="email" placeholder="📧 Email Address" required>
-            <input id="password" type="password" placeholder="🔐 Password" required>
-            
-            <select id="role" required>
-                <option value="">-- Select Role --</option>
-                <option value="student">Student</option>
-                <option value="admin">Admin</option>
-            </select>
-
-            <button class="btn-primary" onclick="register()">Register</button>
-            <p class="auth-link">Have an account? <a href="#" onclick="showLogin(); return false;">Login here</a></p>
+            <div class="auth-header">
+                <h1>📚 Digital Library</h1>
+                <p class="subtitle">Catalogue System</p>
+            </div>
+            <h2>Create New Account</h2>
+            <form onsubmit="register(event)" id="registerForm">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input id="name" type="text" placeholder="John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input id="email" type="email" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input id="password" type="password" placeholder="At least 6 characters" required>
+                </div>
+                <div class="form-group">
+                    <label for="role">Account Type</label>
+                    <select id="role" required>
+                        <option value="">-- Choose Your Role --</option>
+                        <option value="student">👨‍🎓 Student</option>
+                        <option value="admin">👨‍💼 Librarian/Admin</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">✏️ Create Account</button>
+            </form>
+            <p class="auth-link">Already have an account? <a href="#" onclick="showLogin(); return false;">Login here</a></p>
         </div>
     </div>
 
@@ -44,30 +76,41 @@
         <header class="navbar">
             <div class="nav-left">
                 <h1>📚 Digital Library</h1>
-                <p id="welcomeMsg"></p>
+                <p id="welcomeMsg" class="welcome-text"></p>
             </div>
-            <button class="btn-logout" onclick="logout()">Logout</button>
+            <div class="nav-right">
+                <button class="btn-logout" onclick="logout()">🚪 Logout</button>
+            </div>
         </header>
 
         <main class="container">
             <!-- SEARCH & FILTER SECTION -->
             <section class="search-section">
-                <h2>Search & Filter Books</h2>
+                <div class="section-header">
+                    <h2>🔍 Search & Discover Books</h2>
+                    <p class="section-desc">Find books by title, author, ISBN, or category</p>
+                </div>
                 <div class="search-box">
-                    <input id="search" type="text" placeholder="🔍 Search by title, author, or category...">
+                    <input id="search" type="text" placeholder="e.g., 'Python Programming' or 'Agatha Christie'" class="search-input">
                     <button class="btn-search" onclick="searchBooks()">Search</button>
                 </div>
             </section>
 
-            <!-- BOOK CATALOGUE SECTION - REQUIREMENT: Display all books with title, author, and availability -->
+            <!-- BOOK CATALOGUE SECTION - REQUIREMENT: Display all books with title, author, ISBN, and availability -->
             <section class="books-section">
-                <h2>Available Books</h2>
+                <div class="section-header">
+                    <h2>📖 Book Catalogue</h2>
+                    <p class="section-desc">Browse available books in our collection</p>
+                </div>
                 <div id="bookList" class="books-grid"></div>
             </section>
 
             <!-- BORROWED BOOKS SECTION - REQUIREMENT: Track borrowed books with due dates -->
             <section class="borrowed-section">
-                <h2>My Borrowed Books</h2>
+                <div class="section-header">
+                    <h2>📕 My Borrowed Books</h2>
+                    <p class="section-desc">Track your borrowed books and due dates</p>
+                </div>
                 <div id="my" class="borrowed-grid"></div>
             </section>
         </main>
@@ -75,30 +118,50 @@
 
     <!-- ADMIN PANEL -->
     <div id="adminPanel" style="display:none;">
-        <header class="navbar">
+        <header class="navbar admin-navbar">
             <div class="nav-left">
                 <h1>📚 Digital Library Admin</h1>
-                <p id="adminWelcome"></p>
+                <p id="adminWelcome" class="welcome-text"></p>
             </div>
-            <button class="btn-logout" onclick="logout()">Logout</button>
+            <div class="nav-right">
+                <button class="btn-logout" onclick="logout()">🚪 Logout</button>
+            </div>
         </header>
 
         <main class="container">
             <!-- ADD BOOK SECTION - REQUIREMENT: Admin users can add, update, or delete books -->
             <section class="add-book-section">
-                <h2>Add New Book</h2>
-                <div class="form-box">
-                    <input id="title" type="text" placeholder="📖 Book Title" required>
-                    <input id="author" type="text" placeholder="✍️ Author Name" required>
-                    <input id="isbn" type="text" placeholder="📚 ISBN" required>
-                    <input id="category" type="text" placeholder="🏷️ Category" required>
-                    <button class="btn-primary" onclick="addBook()">+ Add Book</button>
+                <div class="section-header">
+                    <h2>➕ Add New Book to Catalogue</h2>
+                    <p class="section-desc">Fill in the book details below to add it to the library</p>
                 </div>
+                <form onsubmit="addBook(event)" id="addBookForm" class="form-box">
+                    <div class="form-group">
+                        <label for="title">Book Title</label>
+                        <input id="title" type="text" placeholder="e.g., 'The Great Gatsby'" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="author">Author Name</label>
+                        <input id="author" type="text" placeholder="e.g., 'F. Scott Fitzgerald'" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="isbn">ISBN</label>
+                        <input id="isbn" type="text" placeholder="e.g., '978-0-7432-7356-5'" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <input id="category" type="text" placeholder="e.g., 'Fiction', 'Science', 'History'" required>
+                    </div>
+                    <button type="submit" class="btn-primary">📚 Add Book</button>
+                </form>
             </section>
 
             <!-- ALL BOOKS MANAGEMENT SECTION -->
             <section class="books-section">
-                <h2>Manage Books</h2>
+                <div class="section-header">
+                    <h2>📋 Manage All Books</h2>
+                    <p class="section-desc">View and delete books from the collection</p>
+                </div>
                 <div id="bookListAdmin" class="books-grid"></div>
             </section>
         </main>
@@ -135,19 +198,39 @@
 
         // Allow Enter key to submit forms
         document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('input').forEach(input => {
-                input.addEventListener('keypress', (e) => {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const addBookForm = document.getElementById('addBookForm');
+
+            if(loginForm) {
+                loginForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    login(e);
+                });
+            }
+
+            if(registerForm) {
+                registerForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    register(e);
+                });
+            }
+
+            if(addBookForm) {
+                addBookForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    addBook(e);
+                });
+            }
+
+            const searchInput = document.getElementById('search');
+            if(searchInput) {
+                searchInput.addEventListener('keypress', (e) => {
                     if(e.key === 'Enter') {
-                        if(input === document.getElementById('lemail') || input === document.getElementById('lpassword')) {
-                            login();
-                        } else if(input === document.getElementById('email') || input === document.getElementById('password')) {
-                            register();
-                        } else if(input === document.getElementById('search')) {
-                            searchBooks();
-                        }
+                        searchBooks();
                     }
                 });
-            });
+            }
         });
     </script>
 </body>
