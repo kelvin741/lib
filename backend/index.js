@@ -1,24 +1,34 @@
 // LIBRARY SYSTEM BACKEND (FINAL WORKING VERSION)
 
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: process.env.CORS_ORIGIN || "*"
+}));
 
 // DATABASE CONNECTION
 const db = new Pool({
-    user:"postgres",
-    host:"localhost",
-    password:"1234",          // CHANGE to your pgAdmin password
-    database:"library_db",
-    port:5432
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.DATABASE_SSL === "true" ? { rejectUnauthorized: false } : false
 });
 
 // TEST ROUTE
 app.get("/",(req,res)=>{ res.send("Library Server Running"); });
+
+// DATABASE CONNECTION TEST
+app.get("/test-db", async (req,res)=>{
+    try {
+        const result = await db.query("SELECT NOW()");
+        res.json({msg:"Database connected!", time: result.rows[0]});
+    } catch (e) {
+        res.status(500).json({msg:"Database connection failed", error: e.message});
+    }
+});
 
 
 // REGISTER
@@ -111,4 +121,5 @@ app.get("/mybooks/:uid", async(req,res)=>{
 
 
 // START SERVER
-app.listen(3003,()=>console.log("Server running on 3003"));
+const PORT = process.env.PORT || 3003;
+app.listen(PORT,()=>console.log(`Server running on ${PORT}`));
