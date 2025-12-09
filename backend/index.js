@@ -78,22 +78,22 @@ app.post("/login", async(req,res)=>{
 });
 
 
-// GET BOOKS
+// GET BOOKS - REQUIREMENT: Display all books with title, author, ISBN, and availability status
 app.get("/books", async(req,res)=>{
     let q = req.query.q || "";
-    let books = await db.query("SELECT * FROM books WHERE title ILIKE $1 OR author ILIKE $1", [`%${q}%`]);
+    let books = await db.query("SELECT * FROM books WHERE title ILIKE $1 OR author ILIKE $1 OR isbn ILIKE $1", [`%${q}%`]);
     res.json(books.rows);
 });
 
 
-// ADD BOOK (ADMIN) — REQUIRES JWT
+// ADD BOOK (ADMIN) — REQUIRES JWT - REQUIREMENT: Admin users can add books
 app.post("/books", verifyToken, async(req,res)=>{
     if(req.user.role !== "admin") return res.status(403).json({msg:"Admin access required"});
     
-    let {title,author,category} = req.body;
+    let {title, author, isbn, category} = req.body;
     try {
-        await db.query("INSERT INTO books(title,author,category) VALUES($1,$2,$3)", 
-        [title,author,category]);
+        await db.query("INSERT INTO books(title,author,isbn,category) VALUES($1,$2,$3,$4)", 
+        [title, author, isbn, category]);
         res.json({msg:"Book added"});
     } catch(e) {
         res.status(400).json({msg:"Error adding book", error: e.message});

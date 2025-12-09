@@ -107,7 +107,7 @@ function getHeaders() {
     };
 }
 
-//  FETCH BOOKS - REQUIREMENT: Display all books with title, author, and availability status
+//  FETCH BOOKS - REQUIREMENT: Display all books with title, author, ISBN, and availability status
 async function searchBooks(){
     let s = document.getElementById("search")?.value || "";
     
@@ -129,6 +129,7 @@ async function searchBooks(){
                     <div class='book-info'>
                         <h4>${b.title}</h4>
                         <p><strong>Author:</strong> ${b.author}</p>
+                        <p><strong>ISBN:</strong> ${b.isbn || "N/A"}</p>
                         <p><strong>Category:</strong> ${b.category || "General"}</p>
                         <p class='status ${statusClass}'>Status: ${status}</p>
                     </div>
@@ -156,9 +157,10 @@ async function searchBooks(){
 async function addBook(){
     let title = document.getElementById("title").value.trim();
     let author = document.getElementById("author").value.trim();
+    let isbn = document.getElementById("isbn").value.trim();
     let category = document.getElementById("category").value.trim();
 
-    if(!title || !author || !category) {
+    if(!title || !author || !isbn || !category) {
         alert("Please fill all fields");
         return;
     }
@@ -167,7 +169,7 @@ async function addBook(){
         let r = await fetch(API + "/books", {
             method: "POST",
             headers: getHeaders(),
-            body: JSON.stringify({title, author, category})
+            body: JSON.stringify({title, author, isbn, category})
         });
 
         let data = await r.json();
@@ -176,6 +178,7 @@ async function addBook(){
             alert("✓ Book added successfully");
             document.getElementById("title").value = "";
             document.getElementById("author").value = "";
+            document.getElementById("isbn").value = "";
             document.getElementById("category").value = "";
             await loadAllBooksAdmin();
         } else {
@@ -201,6 +204,7 @@ async function loadAllBooksAdmin(){
                     <div class='book-info'>
                         <h4>${b.title}</h4>
                         <p><strong>Author:</strong> ${b.author}</p>
+                        <p><strong>ISBN:</strong> ${b.isbn || "N/A"}</p>
                         <p><strong>Category:</strong> ${b.category || "General"}</p>
                         <p><strong>Status:</strong> ${b.available ? "Available" : "Borrowed"}</p>
                     </div>
