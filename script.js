@@ -331,4 +331,5 @@ async function returnBook(id){
     } catch(e) {
         alert("Connection error: " + e.message);
     }
+    myBooks();
 }
